@@ -1,0 +1,6 @@
+﻿metric,target,description
+group_mean_abs_error_pct,<= 0.2,同一日期、同一流量点组均值相对误差
+group_repeatability_sd_pct,<= 0.040,同一日期、同一流量点组内相对误差样本标准差
+u_nor_L_pct,< 0.036,无扰流流量点均值误差形成的线性度等效量
+u_nor_r_pct,< 0.040,所有可评价 day-flow 组中最大的重复性 SD
+u_nor_d_pct,< 0.115,扰流漂移与扰流重复性合成的不确定度等效量

@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+/code/paper_appendix/verification_outputs/
+/code/paper_appendix/verification_figures/
+/code/paper_appendix/verification_reports/
+/code/paper_appendix/official_evaluation/
+output_test/

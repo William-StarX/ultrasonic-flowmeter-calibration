@@ -1,0 +1,153 @@
+% !TEX program = xelatex
+\documentclass[fontset=windows, 12pt, a4paper]{ctexart}
+
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{pdfpages}
+
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{}
+\IfFontExistsTF{Consolas}{\setmonofont{Consolas}}{}
+\newfontfamily\circlednumberfont{SimSun}
+
+\linespread{1.483}
+\setlength{\parindent}{2em}
+% 正文段落不跨页，避免完整句子在页末被截断。
+\interlinepenalty=10000
+\widowpenalty=10000
+\clubpenalty=10000
+\displaywidowpenalty=10000
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+
+\ctexset{
+  section/number       = \arabic{section},
+  subsection/number    = \arabic{section}.\arabic{subsection},
+  subsubsection/number = \arabic{section}.\arabic{subsection}.\arabic{subsubsection},
+}
+\setcounter{tocdepth}{2}
+
+\titleformat{\section}
+  {\centering\fontsize{16pt}{19.2pt}\heiti\bfseries}
+  {\arabic{section}}{1em}{}
+\titleformat{\subsection}
+  {\fontsize{14pt}{16.8pt}\heiti\bfseries}
+  {\arabic{section}.\arabic{subsection}}{1em}{}
+\titleformat{\subsubsection}
+  {\fontsize{12pt}{14.4pt}\heiti\bfseries}
+  {\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}{1em}{}
+\titlespacing{\section}       {0pt}{1.8em}{1.0em}
+\titlespacing{\subsection}    {0pt}{1.25em}{0.65em}
+\titlespacing{\subsubsection} {0pt}{0.9em}{0.4em}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{black!3},
+  frame=single,
+  framesep=6pt,
+  rulecolor=\color{black!30},
+  framerule=0.8pt,
+  breaklines=true,
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true,
+}
+
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+\fancyhf{}
+\fancyhead[C]{\fontsize{10.5pt}{12.6pt}数学建模竞赛论文}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newcommand{\papertitle}[1]{%
+  \thispagestyle{fancy}%
+  \begin{center}
+    {\fontsize{22pt}{26.4pt}\heiti\bfseries #1}
+  \end{center}
+  \vspace{0.55em}
+}
+
+\newcommand{\abstractcn}[2]{%
+  \begin{center}{\fontsize{14pt}{16.8pt}\heiti\bfseries 摘\hspace{2em}要}\end{center}
+  \vspace{0.3em}
+  #1\par
+  \vspace{0.3em}
+  \noindent{\heiti\bfseries 关键词：}#2\par
+  \newpage
+}
+
+\newcommand{\referencescn}{%
+  \input{references}%
+}
+
+\newcommand{\appendixcn}{%
+  \section*{附录 A\quad 支撑材料与完整源程序}%
+  \input{sections/A_code}%
+  \clearpage
+  % 附录 B 仅收录论文核心模型与官方复验所需源程序。
+  \includepdf[pages=-]{附录B_完整源程序代码.pdf}%
+}
+
+\newcommand{\threelinetable}[4]{%
+  \begin{center}
+    {\fontsize{10.5pt}{12.6pt}\heiti\bfseries #1}\par
+    \vspace{0.6em}
+    \begin{tabular}{#2}
+      \toprule
+      #3 \\
+      \midrule
+      #4 \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+}
+
+\begin{document}
+
+\vspace*{0.55cm}
+\papertitle{扰流条件下超声波流量计的多声道补偿建模}
+
+\vspace{0.35cm}
+
+\abstractcn{%
+超声波流量计利用顺流和逆流的声传播时间并不相同这一差异求取轴向流速。然而现实条件下各种因素产生的扰流会使圆管速度剖面偏斜，并改变各声道对截面平均速度的代表性。本文以多声道物理积分为主尺度，结合无扰流标定、剖面特征和受约束核回归，完成四个问题的建模与检验。
+
+针对问题一，先由顺流、逆流传播时间建立单声道速度与窗口体积公式，再说明单条声道无法完整代表非均匀截面速度。再依据附件中的声道位置、等效面积和固定权重构造五声道积分，在统一口径下比较 Phys6、Lagrange、OWICS 与等权积分，最后选取表现最优秀的 Phys6 作为后续建模的物理基线。
+
+针对问题二，从附件中筛选无扰流参考窗口，以 Phys6 为初始估计，构造仅随流量规模变化的二次校准曲线。曲线参数只用训练部分估计，并通过不同流量点的相对误差、组均值与重复性比较，判断正常工况校准能够修正的误差范围。
+
+针对问题三，从五声道响应中提取流量尺度、径向剖面差、A/B 方向不对称、旋流代理以及少量动态与零点稳定性特征，再结合效应量、单特征 AUC、PCA 和多种聚类方法检验特征作用及扰流状态的可分性。最终结果表明，多数扰流状态在在线特征空间中连续重叠。
+
+针对问题四，以固定物理积分为起点，依次用 Ridge 检验线性补偿能力，用 ANN 验证非线性残差学习的适用性，再以紧凑物理特征建立 RBF-KRR。随后引入逐秒稳定性信息构造多核 KRR，并在固定模型结构后加入受约束的无扰流后校准。标签盲验证用于检验未参与训练窗口，最终全量标定结果则只用于题目给定窗口的体积输出，两种口径分别报告。%
+}{%
+超声波流量计；多声道积分；扰流补偿；RBF 核岭回归；剖面可分性%
+}
+
+\input{sections/1_restatement}
+\input{sections/2_assumptions}
+\input{sections/3_symbols}
+\input{sections/4_problem1}
+\input{sections/5_problem2}
+\input{sections/6_problem3}
+\input{sections/7_problem4}
+\input{sections/8_sensitivity}
+\input{sections/9_evaluation}
+
+\referencescn
+\ifdefined\WordExport
+\else
+  \newpage
+  \appendixcn
+\fi
+
+\end{document}

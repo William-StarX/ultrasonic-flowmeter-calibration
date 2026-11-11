@@ -1,0 +1,12 @@
+﻿parameter,value,description
+wheel_radius_mm,10.0,题设默认圆弧砂轮半径
+target_tool_point_count,2000.0,问题二和样例提交的默认刀位点数量
+feed_speed_mm_min,60.0,程序设定进给速度
+interp_period_ms,0.5,数控系统最小插补周期
+axis_repeatability_um,0.8,X/Y 轴双向定位重复性上限
+max_acceleration_m_s2,2.0,轴向最大加速度参考值
+max_jerk_m_s3,50.0,轴向最大加加速度参考值
+wheel_wear_um_per_part,2.0,问题四中砂轮半径磨损假设
+profile_error_target_um,1.0,最终轮廓度误差目标
+equal_arc_error_target_um,0.1,相邻刀位点弧长误差目标
+speed_fluctuation_target_pct,0.1,进给速度波动率目标

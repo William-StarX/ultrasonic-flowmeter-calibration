@@ -1,0 +1,17 @@
+﻿metric,value,description
+raw_point_count,2880.0,原始轮廓点数
+clean_point_count,2880.0,推荐建模轮廓点数
+raw_signed_area_mm2,0.0,原始点列有符号面积
+clean_signed_area_mm2,-16533.360438216136,推荐建模点列有符号面积
+clean_x_min_mm,-77.9386523,推荐建模点 x 最小值
+clean_x_max_mm,77.9396084,推荐建模点 x 最大值
+clean_y_min_mm,-71.2900405,推荐建模点 y 最小值
+clean_y_max_mm,71.2900405,推荐建模点 y 最大值
+sample_point_count,2000.0,样例提交的公开评价指标
+sample_mean_segment_mm,0.2740482080323136,样例提交的公开评价指标
+sample_max_equal_chord_error_um,278.76226427774816,样例提交的公开评价指标
+sample_rms_equal_chord_error_um,96.080102751708,样例提交的公开评价指标
+sample_max_abs_offset_error_um,4.618183790308095,样例提交的公开评价指标
+sample_rms_offset_error_um,0.40130591836460877,样例提交的公开评价指标
+sample_min_clearance_mm,9.995381816209692,样例提交的公开评价指标
+sample_max_clearance_mm,10.000000000000002,样例提交的公开评价指标

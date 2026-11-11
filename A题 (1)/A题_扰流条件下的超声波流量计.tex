@@ -1,0 +1,231 @@
+\documentclass[UTF8,a4paper,11pt]{ctexart}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\geometry{left=2.5cm,right=2.5cm,top=2.4cm,bottom=2.4cm}
+\setlist{nosep}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+
+\title{A 题\quad 扰流条件下的超声波流量计建模}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{背景}
+
+超声波流量计广泛用于水、气和工业流体计量。其基本原理是：超声脉冲沿斜向声道穿过管道，顺流传播和逆流传播的传播时间不同；这种时间差与声道几何参数、流体声速和管道轴向平均流速有关。因此，可以通过顺逆流传播时间差估计流速，并进一步计算一段时间内的流体体积。
+
+实际工程中的管道流速并不总是均匀分布。特别是在弯头、阀门、缩径、扰流件等结构之后，管道截面可能出现非对称流、旋流和局部速度畸变。为了提高精度，工业超声波流量计常采用多声道结构。本题给出的数据来自一台五声道超声波流量计的窗口化测试结果，包括已切分好的窗口内原始声道观测序列，以及由窗口序列进一步整理得到的五条声道等效观测量、A/B 方向差异、剖面特征、启停动态特征、零点状态特征、标准装置体积参考值和基础积分所需的等效几何参数。
+
+算法不仅要平均误差小，还要在相同日期、相同流量点的重复测量中保持稳定；在有扰流的条件下，还要控制扰流引起的系统漂移。本题要求参赛队从基础的超声波流量计原理出发，逐步建立流量估计和扰流补偿模型。
+
+\section*{问题}
+
+\subsection*{问题 1\quad 超声波流量计基础模型}
+
+设声道长度为 $L$，声道与管道轴线夹角为 $\theta$，顺流和逆流传播时间分别为 $t_+$、$t_-$。根据顺逆流传播时间模型，推导估计管道平均流速 $v$ 的公式，并说明在时间段 $T$ 内如何由流速计算体积流量。请首先给出\textbf{单声道}：即只利用一条声道估计流速和体积。
+
+进一步地，考虑真实管道中速度剖面并不均匀，说明为什么需要多声道积分。请给出一种\textbf{多声道积分方法}，例如五声道加权积分、Lagrange 型积分或等权积分，并解释各声道权重的物理含义。可利用附件 6 中的窗口内原始声道观测序列，并结合附件 7 中的等效截面积、声道映射和固定积分权重，尝试构造单声道或多声道积分估计；也可结合附件 1 中的 \texttt{phys6\_volume\_m3}、\texttt{owics\_volume\_m3}、\texttt{lagrange\_volume\_m3}、
+\texttt{equal} \texttt{\_weight\_volume\_m3} 等基础估计量，对普通方法和多声道积分方法做误差统计，比较它们在不同流量点和不同工况下的表现。
+
+\subsection*{问题 2\quad 无扰流条件下的多声道模型}
+
+本题附件仅包含 2026 年 6 月 7 日至 6 月 15 日的数据。其中，无扰流数据为 \texttt{condition\_note = no\_disturbance\_reference} 且 \texttt{disturbance\_id = D0} 的窗口；其余扰流数据对应 \texttt{D1}--\texttt{D8} 八种扰流状态。
+
+请在上述无扰流数据基础上，建立一个多声道流量估计模型。模型可以采用五声道加权、流量点修正曲线、剖面特征修正或其他合理形式。要求说明：
+\begin{enumerate}
+  \item 模型输入变量的物理意义；
+  \item 参数估计方法和防止过拟合的方法；
+  \item 相对误差、组均值误差和组内重复性 $SD$ 的计算结果；
+  \item 与问题 1 中基础估计方法相比，模型在哪些流量点上有改进，在哪些流量点上仍存在不足。
+\end{enumerate}
+
+建议至少采用一种按日期留出验证的方式，检验模型对不同测试日期的稳定性。
+
+\subsection*{问题 3\quad 有扰流条件下的剖面识别与补偿}
+
+本题中有扰流数据为 \texttt{condition\_note = disturbed\_test} 且 \texttt{disturbance\_id} 属于 \texttt{D1}--\texttt{D8} 的窗口。附件中 \texttt{D1}--\texttt{D8} 表示 8 种有扰流状态。请分析有扰流时五声道剖面、A/B 差异、动态特征和零点特征的变化规律，回答以下问题：
+\begin{enumerate}
+  \item 哪些特征对区分无扰流和有扰流最有用？
+  \item 8 种扰流状态是否可以进一步归并为若干类？请给出聚类或判别依据；
+  \item 若最终算法不能直接读取 \texttt{disturbance\_id}，能否利用在线特征构造扰流状态识别规则？
+  \item 在扰流状态下，是否需要对不同流量点采用不同补偿？请给出模型和解释。
+\end{enumerate}
+
+注意：可以在离线分析中使用 \texttt{disturbance\_id} 研究扰流规律，但最终在线补偿规则不应依赖人工输入的扰流编号。
+
+\subsection*{问题 4\quad 达标的最终模型}
+
+综合前面三个问题，建立一个最终流量估计模型。模型应满足以下工程要求：
+\begin{enumerate}
+  \item 输出每个窗口的估计体积 \texttt{model\_volume\_m3}；
+  \item 规则和参数在测试前固定；
+  \item 不建议用日期、窗口序号、标准体积等非运行时信息作为补偿条件；
+  \item 如设置数据有效性门或补偿启用门，应解释其物理含义和可解释性；
+  \item 评价结果应同时报告窗口 MAE、各 day-flow 组通过数、$u_{\mathrm{nor},L}$、$u_{\mathrm{nor},r}$、$u_{\mathrm{nor},d}$。
+\end{enumerate}
+
+请给出最终模型的公式、流程图或伪代码，并使用 \texttt{evaluate\_submission.py} 对结果进行评价。目标是尽量满足
+\[
+|\bar e_g|\le 0.2\%,\quad SD_g\le 0.040\%,\quad
+u_{\mathrm{nor},L}<0.036\%,\quad
+u_{\mathrm{nor},r}<0.040\%,\quad
+u_{\mathrm{nor},d}<0.115\%.
+\]
+如果未能全部达标，请分析最难达标的流量点、日期或扰流状态，并提出后续实验或工程改进建议。
+
+\section*{名词说明}
+
+为避免概念混淆，本题中若干工程名词约定如下：
+\begin{enumerate}
+  \item \textbf{窗口}：对一段连续测试过程切分得到的计算单元。主数据表中每一行对应一个窗口，包含该窗口的开始时间、持续时间、标准体积和各类可计算特征。
+  \item \textbf{等效观测量}：指 \texttt{chord0}--\texttt{chord4}。它们不是原始声波波形，而是由五条声道的传播时间相关量经工程归一化得到的窗口级标量，可理解为各声道对流速或速度剖面的等效观测。
+  \item \textbf{窗口内原始声道观测序列}：指附件 6 中按 \texttt{window\_id} 切好的逐秒观测数据，包括 \texttt{mean\_us\_0}--\texttt{mean\_us\_9} 和 \texttt{diff\_ns\_0}--\texttt{diff\_ns\_9}。其中 \texttt{mean\_us} 表示传播时间均值类观测量，\texttt{diff\_ns} 表示顺逆向时间差类观测量。它们比附件 1 中的窗口级特征更接近仪表原始记录，但仍不是声波波形数据。
+  \item \textbf{等效几何与声道映射}：指附件 7 中给出的等效管道半径、等效截面积、五声道固定权重参数、等效声道长度和位置参数，以及附件 6 中 A/B 两组原始传播链路与 \texttt{chord0}--\texttt{chord4} 的对应关系。这些量用于复现基础积分和构造特征，属于本题给定的固定等效建模参数；题目不要求参赛队反推仪表的真实安装结构。
+  \item \textbf{A/B 方向差异}：指 \texttt{ab0}--\texttt{ab4}。它们反映同一声道两个传播方向或两套测量链路之间的不对称程度，可用于判断旋流、偏流或测量链路不一致带来的影响。
+  \item \textbf{剖面特征}：主要指字段名前缀为 \texttt{profile\_} 的变量，例如上下弦差异、中心弦相对整体、边缘弦相对内侧、A/B 差异汇总和旋流代理等。它们由多声道相对关系构造，用于描述管道截面速度分布是否均匀、是否偏斜或具有旋流趋势。
+  \item \textbf{启停动态特征}：主要指字段名前缀为 \texttt{dyn\_} 的变量，例如进入稳定带时间、尾部时间、起始段或结束段相对平台段的偏离、平台段变异系数和等效有效持续时间等。它们用于描述窗口起止阶段是否已经稳定、切窗是否与真实流量平台对齐，以及窗口内有效稳定时间的长短。
+  \item \textbf{零点状态特征}：指 \texttt{zero\_rate\_med}、\texttt{zero\_rate\_mad}、\texttt{zero\_age\_s}。它们来自最近零点或近零流量状态，可用于描述零漂基线、零点波动和零点信息距当前窗口的时间间隔。
+  \item \textbf{扰流状态}：\texttt{disturbance\_id} 是离线试验记录中的扰流编号，\texttt{D0} 表示无扰流，\texttt{D1}--\texttt{D8} 表示 8 种扰流状态。建立最终在线模型时，可用该字段分析规律，但不应把人工扰流编号作为运行时输入。
+\end{enumerate}
+
+\section*{评价指标}
+
+设第 $i$ 个窗口的标准体积为 $V_i^{\mathrm{std}}$，模型输出体积为 $\hat V_i$，相对误差定义为
+\[
+e_i=\frac{\hat V_i-V_i^{\mathrm{std}}}{V_i^{\mathrm{std}}}\times 100\%.
+\]
+
+同一日期、同一流量点且窗口数不少于 3 的样本构成一个组 $g$。若该组有 $n_g$ 个窗口，则组均值误差与组内重复性分别为
+\[
+\bar e_g=\frac{1}{n_g}\sum_{k=1}^{n_g}e_{g,k},
+\]
+\[
+SD_g=
+\sqrt{
+	\frac{1}{n_g-1}
+	\sum_{k=1}^{n_g}(e_{g,k}-\bar e_g)^2
+}.
+\]
+一个组达标要求为
+\[
+|\bar e_g|\le 0.2\%,\qquad SD_g\le 0.040\%.
+\]
+
+本题还要求考察三项总指标。首先，在无扰流参考数据中，对每个流量点 $p$ 计算平均相对误差
+\[
+\bar e_p^{(0)}=\frac{1}{N_p^{(0)}}\sum_{i\in\Omega_p^{(0)}} e_i,
+\]
+其中 $\Omega_p^{(0)}$ 表示无扰流参考条件下流量点 $p$ 的窗口集合，$N_p^{(0)}$ 为该集合的窗口数。线性度等效量定义为
+\[
+u_{\mathrm{nor},L}=
+\sqrt{
+	\frac{1}{m-1}
+	\sum_{p=1}^{m}\left(\bar e_p^{(0)}\right)^2
+},
+\]
+其中 $m$ 为参与计算的无扰流流量点个数。
+
+重复性等效量定义为所有可评价组中的最大组内标准差：
+\[
+u_{\mathrm{nor},r}=\max_g SD_g.
+\]
+
+扰流漂移项先比较同一流量点下无扰流均值与某一扰流状态 $r$ 的均值：
+\[
+\Delta e_{r,p}=\bar e_p^{(0)}-\bar e_{r,p}^{(d)},
+\]
+其中 $\bar e_{r,p}^{(d)}$ 为扰流状态 $r$、流量点 $p$ 下的平均相对误差。扰流漂移不确定度取
+\[
+u_{\mathrm{nor},d,c}=\frac{\max_{r,p}|\Delta e_{r,p}|}{\sqrt{3}}.
+\]
+扰流重复性项取各扰流状态和流量点组合中的最大组内标准差：
+\[
+u_{\mathrm{nor},d,r}=\max_{r,p} SD_{r,p}^{(d)}.
+\]
+于是扰流综合指标定义为
+\[
+u_{\mathrm{nor},d}=
+\sqrt{
+	u_{\mathrm{nor},d,c}^2+
+	u_{\mathrm{nor},d,r}^2
+}.
+\]
+
+最终目标为
+\[
+u_{\mathrm{nor},L}<0.036\%,\qquad
+u_{\mathrm{nor},r}<0.040\%,\qquad
+u_{\mathrm{nor},d}<0.115\%.
+\]
+评价脚本中给出了上述指标的一种可复现实作。
+
+\section*{数据说明}
+
+本题提供以下附件：
+\begin{enumerate}
+  \item \texttt{attachment1\_window\_data.csv}：窗口级数据，共 159 个窗口、40 个字段；
+  \item \texttt{attachment2\_condition\_schedule.csv}：测试日期与扰流状态的汇总；
+  \item \texttt{attachment3\_data\_dictionary.csv}：字段说明；
+  \item \texttt{attachment4\_baseline\_summary.csv}：若干基础五弦积分方法的误差统计；
+  \item \texttt{attachment5\_inspection\_targets.csv}：本题采用的指标；
+  \item \texttt{attachment6\_window\_raw\_samples.csv}：已按窗口切分的原始声道观测序列，共 29322 行，可与附件 1 通过 \texttt{window\_id} 关联；
+  \item \texttt{attachment7\_meter\_geometry.csv}：仪表等效几何、等效工程声道参数、五声道积分权重和原始链路映射，共 11 行；
+  \item \texttt{sample\_submission\_phys6.csv}：样例提交文件；
+  \item \texttt{evaluate\_submission.py}：评价脚本，输入 \texttt{window\_id, model\_volume\_m3} 两列即可计算指标。
+\end{enumerate}
+
+其中，附件 1 是主建模表，适合直接建立窗口级流量估计和扰流补偿模型；附件 6 是可选的较低层观测序列表，适合用于问题 1 中验证单声道、多声道积分思想，或自行构造动态、剖面等特征；附件 7 给出从原始声道观测到基础五声道积分所需的等效常数和映射。参赛队可以直接使用附件 1 建模，也可以基于附件 6 和附件 7 自行构造特征后再建模。
+
+主数据表中的关键字段包括：
+\begin{enumerate}
+  \item \texttt{standard\_volume\_m3}：标准装置给出的窗口体积；
+  \item \texttt{phys6\_volume\_m3}、\texttt{owics\_volume\_m3}、\texttt{lagrange\_volume\_m3}、\texttt{equal\_weight\_volume\_m3}：几种基础积分估计结果；
+  \item \texttt{chord0}--\texttt{chord4}：五条声道的窗口等效观测量；
+  \item \texttt{ab0}--\texttt{ab4}：五条声道的 A/B 方向差异；
+  \item \texttt{profile\_top\_bottom}、\texttt{profile\_center\_all} 等：剖面状态特征；
+  \item \texttt{dyn\_first\_0p1\_s}、\texttt{dyn\_tail\_0p1\_s} 等：启停动态特征；
+  \item \texttt{zero\_rate\_med}、\texttt{zero\_rate\_mad}、\texttt{zero\_age\_s}：零点状态特征；
+  \item \texttt{condition\_note}：测试条件说明，取 \texttt{no\_disturbance\_reference} 或 \texttt{disturbed\_test}；
+  \item \texttt{disturbance\_id}：扰流状态编号，\texttt{D0} 表示无扰流，\texttt{D1}--\texttt{D8} 表示 8 种扰流。
+\end{enumerate}
+
+附件 6 中的关键字段包括：
+\begin{enumerate}
+  \item \texttt{window\_id}、\texttt{sample\_index}、\texttt{timestamp}、\texttt{rel\_time\_s}：样本所属窗口、窗口内序号、绝对时间和相对窗口开始时间；
+  \item \texttt{mean\_us\_0}--\texttt{mean\_us\_9}：10 路传播时间均值类观测量，单位 us；
+  \item \texttt{diff\_ns\_0}--\texttt{diff\_ns\_9}：10 路顺逆向时间差类观测量，单位 ns；
+  \item \texttt{flow\_velocity\_m\_s}、\texttt{water\_temp\_c}、\texttt{cumulative\_flow\_m3}：原始记录中的瞬时流速、水温和累计流量。
+\end{enumerate}
+
+附件 7 中的关键字段包括：
+\begin{enumerate}
+  \item 管道几何字段：工程计算中使用的等效半径、等效直径、截面积和管壁粗糙度；
+  \item 声道位置字段：五条声道相对管道圆心的高度及其归一化位置；
+  \item 声道长度字段：用于由传播时间计算声速/流速的总声道长度、参与流速换算长度和非流动等效长度；
+  \item 投影因子字段：流速换算公式中使用的等效投影因子，本数据为 $1/\sqrt{2}$；
+  \item 权重字段：包括 Phys6、OWICS、工程积分 Gauss-Jacobi、Lagrange 和等权五套固定权重参数。其中 Phys6 保留基础工程法原系数，五项和约为 0.993，不强制归一；其余几套为归一化积分权重，且 OWICS 与基于声道位置的工程积分权重一致；
+  \item 原始链路字段：附件 6 中 A/B 两组原始链路与五条等效声道的对应列名；
+  \item 时间差映射字段：由附件 6 的窗口均值时间差近似复现附件 1 中 \texttt{chord0}--\texttt{chord4} 的等效映射系数。该映射不使用标准体积，仅用于理解和复现等效观测量。
+\end{enumerate}
+
+注意：\texttt{date}、\texttt{start\_time}、\texttt{window\_id} 可用于离线分组统计和交叉验证，但不应作为最终流量补偿公式的运行时输入。附件 7 中的等效几何、等效工程声道参数、声道映射和固定权重属于测试前固定常数，可以作为模型常数使用。最终模型应尽量使用流量点、五声道观测量、剖面特征、动态特征和零点特征等可在线计算的量。
+
+\section*{提交要求}
+
+参赛队应提交建模论文、结果文件和可复现结果的支撑代码。结果文件为 CSV 格式，至少包含两列：
+\[
+\texttt{window\_id},\qquad \texttt{model\_volume\_m3}.
+\]
+
+论文中应包括：模型假设、变量说明、公式推导、参数估计、验证方法、指标结果、扰流补偿解释和模型局限性分析。若使用机器学习方法，应说明特征来源、训练验证方式、复杂度控制和在单片机或上位机中固化实现的可能性。
+
+支撑代码要求参照全国大学生数学建模竞赛对支撑材料的要求：应提交完整源程序、必要的运行说明和依赖环境说明；代码应能从本题附件数据出发，复现论文中的主要建模流程、最终提交 CSV 和主要评价指标；路径应尽量使用相对路径，不应依赖本机私有目录、手工中间操作或未随题提供的数据；不得只提交截图、伪代码、交互记录或不可运行片段。若算法含随机过程，应在代码或说明中固定随机种子，并说明可能产生微小差异的原因。
+
+\end{document}

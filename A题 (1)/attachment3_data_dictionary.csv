@@ -1,0 +1,54 @@
+﻿field,description
+window_id,窗口编号，提交结果时用于对齐。
+date,测试日期，格式 YYYYMMDD；建模时可用于分组验证，但不应作为运行时补偿条件。
+start_time,窗口开始时间。
+duration_s,窗口持续时间，单位 s。
+flow_point,名义流量点，取 20、30、40、50、60、70、80。
+standard_volume_m3,标准装置给出的该窗口体积，单位 m^3。
+standard_rate_m3h,由标准体积和持续时间换算的平均流量，单位 m^3/h。
+condition_note,测试条件说明：no_disturbance_reference 表示无扰流参考，disturbed_test 表示有扰流测试。
+is_disturbed,是否为有扰流工况；1 表示有扰流，0 表示无扰流。
+disturbance_id,扰流件编号，D0 表示无扰流，D1--D8 表示 8 种扰流。
+disturbance_angle_deg,扰流安装角度，缺失表示无记录。
+phys6_volume_m3,基于固定五弦物理权重的基础体积估计。
+owics_volume_m3,一种五弦积分体积估计。
+lagrange_volume_m3,一种 Lagrange 型五弦积分体积估计。
+equal_weight_volume_m3,五弦等权体积估计。
+chord0--chord4,五条声道的窗口等效观测量，由声道传播时间相关量经工程归一化得到，可作为各声道流速贡献或剖面代理量。
+ab0--ab4,五条声道的 A/B 方向差异，反映同一声道两个方向或两套测量链路之间的不对称程度。
+profile_top_bottom,上下弦剖面差异特征，用于描述管道截面上下区域速度分布差异。
+profile_center_all,中心弦相对整体的剖面特征，用于描述中心区域与整体平均状态的偏离。
+profile_edge_inner,边缘弦与内侧弦的相对特征，用于描述边缘区域和内侧区域的速度分布差异。
+profile_inner_skew,内侧弦偏斜特征，用于描述内侧声道之间的不对称。
+profile_ab_abs,A/B 方向差异绝对量汇总，可作为方向不一致和旋流影响的代理特征。
+profile_swirl,旋流或偏流代理特征，用于辅助识别扰流导致的剖面畸变。
+dyn_first_0p1_s,启停动态特征：启动后首次进入 10% 稳定带的时间。
+dyn_tail_0p1_s,启停动态特征：进入 10% 稳定带后的尾部时间；缺失表示该动态链路不可计算。
+dyn_start_over_plateau,启停动态特征：起始段相对平台段的比例或偏离程度。
+dyn_end_over_plateau,启停动态特征：结束段相对平台段的比例或偏离程度。
+dyn_plateau_cv,启停动态特征：平台段变异系数，用于描述窗口稳定段波动。
+dyn_active_eq_s,启停动态特征：等效有效持续时间，用于描述窗口内真正稳定有效的积分时长。
+zero_rate_med,零点状态特征：最近零点运行段的中位流量代理量，用于描述零漂基线。
+zero_rate_mad,零点状态特征：最近零点运行段的稳健波动量，用于描述零点稳定性。
+zero_age_s,零点状态特征：距最近零点状态的时间，单位 s，用于描述零点信息的新鲜程度。
+sample_index,附件6字段：窗口内样本序号，从 0 开始。
+timestamp,附件6字段：原始观测时间戳，精确到毫秒。
+rel_time_s,附件6字段：样本相对该窗口开始时刻的时间，单位 s。
+source_file,附件6字段：该样本来自的原始导出文件名。
+source_sheet,附件6字段：该样本来自的原始导出工作表名。
+mean_us_0--mean_us_9,附件6字段：10 路声道或传播链路的平均传播时间观测量，单位 us。
+diff_ns_0--diff_ns_9,附件6字段：10 路声道或传播链路的顺逆向时间差观测量，单位 ns。
+flow_velocity_m_s,附件6字段：仪表原始记录中的瞬时流速读数，单位 m/s，可用于观察窗口内动态变化。
+water_temp_c,附件6字段：仪表原始记录中的水温，单位摄氏度。
+cumulative_flow_m3,附件6字段：仪表原始记录中的累计流量，单位 m^3；部分样本可能为空。
+record_type,附件7字段：记录类型，meter 表示仪表等效常数，chord_mapping 表示五声道映射与权重。
+effective_pipe_radius_m,附件7参数：等效管道半径，单位 m。
+effective_pipe_diameter_m,附件7参数：等效管道直径，单位 m。
+effective_pipe_area_m2,附件7参数：等效管道截面积，单位 m^2。
+pipe_roughness_m,附件7参数：工程计算中使用的管壁粗糙度，单位 m。
+channel_height_m/normalized_channel_height,附件7字段：声道相对管道圆心的高度及其按半径归一化的位置。
+sound_length_m/sound_length_flow_m/sound_length_no_flow_m,附件7字段：用于声速和流速换算的声道总长度、参与流速换算长度及剩余非流动等效长度，单位 m。
+flow_velocity_projection_factor,附件7字段：流速换算公式中使用的等效投影因子 1/sqrt(2)。
+weight_phys6/weight_owics/weight_flowcal_gauss_jacobi/weight_lagrange/weight_equal,附件7字段：五声道权重参数；weight_phys6 保留基础工程法原系数，五项和约为 0.993，不强制归一；其余几套为归一化积分权重，其中 weight_owics 与基于声道位置的工程积分权重一致。
+raw_mean_col_a/raw_diff_col_a/raw_mean_col_b/raw_diff_col_b,附件7字段：附件6中 A/B 两组原始传播链路与附件1 chord0--chord4 的对应列名。
+raw_diff_gain_a_mps_per_ns/raw_diff_gain_b_mps_per_ns/raw_diff_intercept_mps,附件7字段：从附件6窗口均值时间差近似复现附件1 chord 的等效线性映射系数。

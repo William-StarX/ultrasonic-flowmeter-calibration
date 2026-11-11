@@ -1,0 +1,2 @@
+﻿window_count,mae_pct,mean_error_pct,max_abs_error_pct,group_count,group_pass_count,group_pass,max_abs_group_mean_pct,u_nor_L_pct,u_nor_r_pct,u_nor_d_pct,pass_u_nor_L,pass_u_nor_r,pass_u_nor_d,pass_all_3
+159,0.015891393801,0.0058945470094,0.0574222541271,30,30,30/30,0.0287352294328,0.00958514021291,0.0336297417486,0.0484346784882,True,True,True,True

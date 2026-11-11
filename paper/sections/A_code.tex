@@ -1,0 +1,85 @@
+本附录对应最终提交支撑包，内容分为支撑材料目录、完整文件清单、源程序说明和复现顺序。赛题附件 1 至附件 7 属于赛事统一提供的数据，按规范不重复放入支撑包；复现时应将原始目录“A题 (1)”放在支撑包根目录。附录 B 逐行收录建模使用的全部 11 个 Python 文件，不包含废弃模型、文档转换或临时绘图脚本。
+
+\subsection*{A.1 支撑材料目录结构}
+
+\begingroup
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{p{0.31\textwidth}p{0.60\textwidth}}
+\toprule
+目录或文件 & 内容与用途 \\
+\midrule
+\endfirsthead
+\toprule
+目录或文件 & 内容与用途 \\
+\midrule
+\endhead
+{\ttfamily\raggedright code/paper\_\allowbreak appendix/\par} & 四个问题、模型演进、最终后校准和官方指标复验所需的 11 个完整 Python 文件。 \\
+\texttt{code/outputs/} & 问题三复跑时可选读取的整组留出失效诊断结果。 \\
+\texttt{02\_关键结果数据/} & 基础积分、D0 校准、扰流特征、模型比较、最终提交和失效分析的必要结果。 \\
+\texttt{03\_论文采用图表/} & 正文实际使用的 10 幅 PDF 图以及问题四工程图的可编辑 DrawIO 源文件。 \\
+\texttt{04\_自主查阅资料/} & 文献理论索引与直接支撑积分、剖面修正、ANN、KRR 和物理约束的关键原文。 \\
+\texttt{05\_复验与说明/} & 源码独立复跑记录、官方评价结果、文件哈希、AI 工具使用详情和终审报告。 \\
+\texttt{requirements.txt} & Python 第三方依赖清单。 \\
+\texttt{README.md} & 支撑包结构、原始附件放置方式和运行入口。 \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection*{A.2 支撑材料完整文件清单}
+
+下表逐项列出最终压缩包中的全部文件。文件哈希另见支撑包中的 \texttt{05\_复验与说明/文件清单与SHA256.csv}。
+
+\input{sections/A_support_manifest}
+
+\subsection*{A.3 完整源程序及其作用}
+
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{longtable}{p{0.39\textwidth}p{0.52\textwidth}}
+\toprule
+源程序 & 作用 \\
+\midrule
+\endfirsthead
+\toprule
+源程序 & 作用 \\
+\midrule
+\endhead
+{\ttfamily\raggedright problem1\_multichannel\_\allowbreak integration.py\par} & 重建五声道观测，计算 Phys6、OWICS、Lagrange、等权和单声道估计。 \\
+{\ttfamily\raggedright problem2\_d0\_\allowbreak calibration.py\par} & 在 D0 无扰流窗口上建立正常工况校准与多声道权重模型。 \\
+{\ttfamily\raggedright model\_evolution\_\allowbreak ridge\_ann.py\par} & 公共数据读取、评价指标、Ridge 与 ANN 残差模型及模型演进对照。 \\
+{\ttfamily\raggedright physical\_feature\_\allowbreak library.py\par} & 构造紧凑剖面特征和运行时物理特征。 \\
+{\ttfamily\raggedright compact\_rbf\_krr.py\par} & 实现标签盲分层、RBF-KRR、超参数搜索和紧凑模型评价。 \\
+{\ttfamily\raggedright ann\_krr\_same\_split.py\par} & 在同一 $118/41$ 划分上比较 ANN 与紧凑 RBF-KRR。 \\
+{\ttfamily\raggedright problem3\_disturbance\_\allowbreak features.py\par} & 计算扰流特征重要性、PCA、聚类及其与失效类型的关系。 \\
+{\ttfamily\raggedright fullfit\_expression\_\allowbreak baseline.py\par} & 建立高维全量近插值对照，用于样本内表达上限检验。 \\
+{\ttfamily\raggedright physical\_stability\_\allowbreak dual\_kernel\_krr.py\par} & 从附件 6 提取逐秒稳定性特征，并融合物理核与稳定性核。 \\
+{\ttfamily\raggedright final\_postcalibrated\_\allowbreak dual\_kernel\_krr.py\par} & 在冻结双核 KRR 上搜索受约束 D0-RBF 后校准并生成最终提交。 \\
+{\ttfamily\raggedright official\_evaluator.py\par} & 按题设口径计算相对误差、评价组、$u_{\mathrm{nor},L}$、$u_{\mathrm{nor},r}$ 和 $u_{\mathrm{nor},d}$。 \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+上述文件构成一条闭合依赖链。公共函数只在这 11 个文件之间导入，运行时不需要旧版候选模型代码。各脚本会自动创建独立的结果、图形和报告目录，因此可在新目录中直接复跑，不会覆盖论文采用的验收结果。
+
+\subsection*{A.4 运行顺序与官方复验}
+
+\begin{lstlisting}[language=bash,basicstyle=\ttfamily\scriptsize,aboveskip=0.25em,belowskip=0pt]
+python code/paper_appendix/problem1_multichannel_integration.py
+python code/paper_appendix/problem2_d0_calibration.py
+python code/paper_appendix/model_evolution_ridge_ann.py
+python code/paper_appendix/physical_feature_library.py
+python code/paper_appendix/compact_rbf_krr.py
+python code/paper_appendix/ann_krr_same_split.py
+python code/paper_appendix/problem3_disturbance_features.py
+python code/paper_appendix/fullfit_expression_baseline.py
+python code/paper_appendix/physical_stability_dual_kernel_krr.py
+python code/paper_appendix/final_postcalibrated_dual_kernel_krr.py
+python code/paper_appendix/official_evaluator.py \
+  code/paper_appendix/verification_outputs/submission_final.csv \
+  --output-dir code/paper_appendix/official_evaluation
+\end{lstlisting}
+
+独立干净目录复跑时，上述 11 个程序退出码均为 0。最后一条命令重新评价生成的 \texttt{submission\_final.csv}，得到 159 个窗口、30/30 评价组通过，$u_{\mathrm{nor},L}=0.009585\%$、$u_{\mathrm{nor},r}=0.033630\%$、$u_{\mathrm{nor},d}=0.048435\%$。该结果是同样本全量标定证据；标签盲划分仍单独用于讨论泛化能力，两种口径不得混用。

@@ -1,0 +1,4 @@
+﻿term,coefficient_pct,train_windows,d0_train_windows,split_file
+b0,0.4027267433612186,118,7,stratified_model_search_best_split.csv
+b1,-0.03303144284601312,118,7,stratified_model_search_best_split.csv
+b2,-0.007534861686259523,118,7,stratified_model_search_best_split.csv

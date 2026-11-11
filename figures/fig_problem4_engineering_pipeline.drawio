@@ -1,0 +1,23 @@
+<mxfile host="app.diagrams.net" modified="2026-07-14T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="problem4-engineering" name="Page-1">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/><mxCell id="1" parent="0"/>
+        <mxCell id="title" value="问题四模型递进的工程方框图" style="text;html=1;align=center;fontSize=22;fontStyle=1;fontColor=#000000;fontFamily=Microsoft YaHei;" vertex="1" parent="1"><mxGeometry x="284" y="65" width="600" height="40" as="geometry"/></mxCell>
+        <mxCell id="n1" value="&lt;b&gt;1  固定物理积分&lt;/b&gt;&lt;br&gt;Phys6 工程基线&lt;br&gt;五声道固定权重" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=1;fontColor=#000000;fontFamily=Microsoft YaHei;fontSize=16;" vertex="1" parent="1"><mxGeometry x="35" y="170" width="330" height="135" as="geometry"/></mxCell>
+        <mxCell id="n2" value="&lt;b&gt;2  Ridge&lt;/b&gt;&lt;br&gt;线性残差补偿&lt;br&gt;验证剖面特征有效" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=1;fontColor=#000000;fontFamily=Microsoft YaHei;fontSize=16;" vertex="1" parent="1"><mxGeometry x="420" y="170" width="330" height="135" as="geometry"/></mxCell>
+        <mxCell id="n3" value="&lt;b&gt;3  ANN&lt;/b&gt;&lt;br&gt;复杂非线性补偿&lt;br&gt;验证非线性必要" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=1;fontColor=#000000;fontFamily=Microsoft YaHei;fontSize=16;" vertex="1" parent="1"><mxGeometry x="805" y="170" width="330" height="135" as="geometry"/></mxCell>
+        <mxCell id="n4" value="&lt;b&gt;4  紧凑 RBF-KRR&lt;/b&gt;&lt;br&gt;紧凑物理特征&lt;br&gt;受控连续非线性" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=1;fontColor=#000000;fontFamily=Microsoft YaHei;fontSize=16;" vertex="1" parent="1"><mxGeometry x="805" y="390" width="330" height="135" as="geometry"/></mxCell>
+        <mxCell id="n5" value="&lt;b&gt;5  附件6多核 v6&lt;/b&gt;&lt;br&gt;逐秒稳定性特征&lt;br&gt;多核融合增强" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=1;fontColor=#000000;fontFamily=Microsoft YaHei;fontSize=16;" vertex="1" parent="1"><mxGeometry x="420" y="390" width="330" height="135" as="geometry"/></mxCell>
+        <mxCell id="n6" value="&lt;b&gt;6  定向校准 v8&lt;/b&gt;&lt;br&gt;D0 线性度 + RBF 校准&lt;br&gt;官方指标联合约束" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=1;fontColor=#000000;fontFamily=Microsoft YaHei;fontSize=16;" vertex="1" parent="1"><mxGeometry x="35" y="390" width="330" height="135" as="geometry"/></mxCell>
+        <mxCell id="out" value="&lt;b&gt;最终体积预测与官方评价脚本复验&lt;/b&gt;&lt;br&gt;平均精度、线性度、重复性与扰流漂移" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;strokeWidth=1;fontColor=#000000;fontFamily=Microsoft YaHei;fontSize=16;" vertex="1" parent="1"><mxGeometry x="384" y="650" width="400" height="80" as="geometry"/></mxCell>
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;strokeWidth=1;strokeColor=#000000;" edge="1" parent="1" source="n1" target="n2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e23" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;strokeWidth=1;strokeColor=#000000;" edge="1" parent="1" source="n2" target="n3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e34" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;strokeWidth=1;strokeColor=#000000;" edge="1" parent="1" source="n3" target="n4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e45" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;strokeWidth=1;strokeColor=#000000;" edge="1" parent="1" source="n4" target="n5"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e56" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;strokeWidth=1;strokeColor=#000000;" edge="1" parent="1" source="n5" target="n6"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6out" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;strokeWidth=1;strokeColor=#000000;" edge="1" parent="1" source="n6" target="out"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

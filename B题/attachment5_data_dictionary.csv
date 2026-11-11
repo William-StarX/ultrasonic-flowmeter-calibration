@@ -1,0 +1,14 @@
+﻿field_or_file,description
+attachment1_profile_points_raw.csv,原始轮廓离散点；用于数据质量检查，不建议直接作为最终建模点。
+attachment2_profile_points_clean.csv,推荐建模轮廓离散点；单位 mm，闭合非圆曲线，问题二至问题四默认使用。
+point_id,轮廓点编号，从 0 开始。
+x_mm,轮廓点 x 坐标，单位 mm。
+y_mm,轮廓点 y 坐标，单位 mm。
+attachment3_machine_params.csv,机床、砂轮、插补与精度目标参数。
+attachment4_baseline_summary.csv,基础数据质量统计和样例提交评价结果。
+attachment6_problem_diagram.png,问题几何示意图，展示工件轮廓与砂轮中心等距轨迹的关系。
+sample_submission_discrete_offset_2000.csv,样例提交文件，基于离散法向偏移生成，仅用于说明格式，不代表最优方法。
+tool_id,刀位点编号，从 0 开始。
+x_center_mm,砂轮中心 x 坐标，单位 mm。
+y_center_mm,砂轮中心 y 坐标，单位 mm。
+evaluate_submission.py,公开评价脚本；输入提交 CSV，输出等距误差和等弧长均匀性等指标。
