@@ -14,7 +14,7 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-DATA = ROOT / "A题 (1)" / "attachment1_window_data.csv"
+DATA = ROOT / "data" / "calibration" / "attachment1_window_data.csv"
 
 
 def relativeErrorPct(moxingTiji: pd.Series, biaozhunTiji: pd.Series) -> pd.Series:
@@ -40,7 +40,10 @@ def groupTable(df: pd.DataFrame) -> pd.DataFrame:
                 "pass_group": abs(mean_err) <= 0.2 and sd <= 0.040,
             }
         )
-    return pd.DataFrame(rows)
+    return pd.DataFrame(
+        rows,
+        columns=["date", "flow_point", "n", "mean_error_pct", "repeatability_sd_pct", "range_pct", "pass_group"],
+    )
 
 
 def linearityUL(df: pd.DataFrame) -> float:
@@ -78,17 +81,26 @@ def disturbanceUD(df: pd.DataFrame) -> float:
     return math.sqrt(u_d_c * u_d_c + u_d_r * u_d_r)
 
 
-def evaluate(submission: Path, output_dir: Path) -> None:
-    data = pd.read_csv(DATA, encoding="utf-8-sig")
+def evaluate(submission: Path, output_dir: Path, reference: Path = DATA) -> None:
+    data = pd.read_csv(reference, encoding="utf-8-sig")
     sub = pd.read_csv(submission, encoding="utf-8-sig")
+    required_reference = {"window_id", "date", "flow_point", "condition_note", "disturbance_id", "standard_volume_m3"}
+    if not required_reference.issubset(data.columns):
+        raise ValueError(f"reference is missing columns: {', '.join(sorted(required_reference - set(data.columns)))}")
     if not {"window_id", "model_volume_m3"}.issubset(sub.columns):
-        raise ValueError("submission must contain columns: window_id, model_volume_m3")
+        raise ValueError("estimates must contain columns: window_id, model_volume_m3")
+    if any(frame.empty or frame["window_id"].isna().any() or not frame["window_id"].is_unique for frame in (data, sub)):
+        raise ValueError("reference and estimates must have nonempty, unique window_id values")
+    if set(data["window_id"]) != set(sub["window_id"]):
+        raise ValueError("reference and estimates must cover the same window_id values")
+    standard_volume = data["standard_volume_m3"].to_numpy(dtype=float)
+    model_volume = sub["model_volume_m3"].to_numpy(dtype=float)
+    if not np.isfinite(standard_volume).all() or (standard_volume <= 0).any():
+        raise ValueError("standard_volume_m3 must contain finite, positive values")
+    if not np.isfinite(model_volume).all():
+        raise ValueError("model_volume_m3 must contain finite values")
 
-    df = data.merge(sub[["window_id", "model_volume_m3"]], on="window_id", how="left")
-    if df["model_volume_m3"].isna().any():
-        missing = int(df["model_volume_m3"].isna().sum())
-        raise ValueError(f"submission misses {missing} window_id rows")
-
+    df = data.merge(sub[["window_id", "model_volume_m3"]], on="window_id", validate="one_to_one")
     df["model_error_pct"] = relativeErrorPct(df["model_volume_m3"], df["standard_volume_m3"])
     groups = groupTable(df)
     u_l = linearityUL(df)

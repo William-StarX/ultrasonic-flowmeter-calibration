@@ -30,7 +30,7 @@ except ModuleNotFoundError:
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = next(p for p in ROOT.iterdir() if p.is_dir() and (p / "attachment1_window_data.csv").exists())
+DATA_DIR = ROOT / "data" / "calibration"
 OUT_DIR = Path(__file__).resolve().parent / "verification_outputs"
 FIG_DIR = Path(__file__).resolve().parent / "verification_figures"
 REPORT = Path(__file__).resolve().parent / "verification_reports" / "INTEGRATION_METHOD_ANALYSIS.md"

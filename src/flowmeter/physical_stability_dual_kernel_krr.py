@@ -32,6 +32,7 @@ import numpy as np
 import pandas as pd
 
 from model_evolution_ridge_ann import (
+    DATA_DIR,
     GROUP_KEY,
     OUT_DIR,
     RANDOM_SEED,
@@ -44,7 +45,6 @@ from model_evolution_ridge_ann import (
 from physical_feature_library import enhancedFeatureFrame
 
 
-ROOT = Path(__file__).resolve().parents[2]
 REPORT = Path(__file__).resolve().parent / "verification_reports" / "STRATIFIED_MODEL_SEARCH_REPORT.md"
 TARGET_VALIDATION_FRACTION = 0.30
 N_SPLITS = 40
@@ -429,18 +429,6 @@ class FittedCandidate:
 # ---------------------------------------------------------------------------
 
 
-def findProjectDataFile(filename: str) -> Path:
-    candidates = [ROOT / filename]
-    candidates.extend(ROOT.glob(f"*/{filename}"))
-    candidates.extend(ROOT.glob(f"*/*/{filename}"))
-    for path in candidates:
-        if path.exists():
-            return path
-    raise FileNotFoundError(
-        f"cannot find {filename}; expected it in the project root or a first/second-level data directory"
-    )
-
-
 def hampelFilter(values: np.ndarray, window: int = 9, n_sigma: float = 4.0) -> tuple[np.ndarray, np.ndarray]:
     """Causal information is not used; this is an offline symmetric robust window statistic."""
     series = pd.Series(np.asarray(values, dtype=float))
@@ -667,12 +655,10 @@ def buildRawWindowFeatures(raw: pd.DataFrame, geo: pd.DataFrame) -> pd.DataFrame
     return result[["window_id", *RAW_FEATURE_COLUMNS]]
 
 
-def loadDataWithRawFeatures() -> pd.DataFrame:
-    # 先读取附件1主表，再合并附件6构造的窗口级稳健特征。
-    # 这里必须调用导入的 load_data()，不能递归调用本函数。
-    data = loadData().reset_index(drop=True)
-    raw_path = findProjectDataFile("attachment6_window_raw_samples.csv")
-    geo_path = findProjectDataFile("attachment7_meter_geometry.csv")
+def loadDataWithRawFeatures(data_dir: Path = DATA_DIR, output_dir: Path = OUT_DIR) -> pd.DataFrame:
+    data = loadData(data_dir / "attachment1_window_data.csv")
+    raw_path = data_dir / "attachment6_window_raw_samples.csv"
+    geo_path = data_dir / "attachment7_meter_geometry.csv"
     raw = pd.read_csv(raw_path, encoding="utf-8-sig")
     geo = pd.read_csv(geo_path, encoding="utf-8-sig")
     raw_features = buildRawWindowFeatures(raw, geo)
@@ -681,7 +667,7 @@ def loadDataWithRawFeatures() -> pd.DataFrame:
         missing_windows = int(merged[RAW_FEATURE_COLUMNS].isna().any(axis=1).sum())
         raise ValueError(f"raw features missing for {missing_windows} windows")
     raw_features.to_csv(
-        OUT_DIR / "raw_window_robust_features.csv",
+        output_dir / "raw_window_robust_features.csv",
         index=False,
         encoding="utf-8-sig",
     )

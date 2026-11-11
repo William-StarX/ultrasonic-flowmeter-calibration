@@ -29,7 +29,7 @@ except ModuleNotFoundError:
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = ROOT / "A题 (1)"
+DATA_DIR = ROOT / "data" / "calibration"
 WINDOW_DATA = DATA_DIR / "attachment1_window_data.csv"
 OUT_DIR = Path(__file__).resolve().parent / "verification_outputs"
 FIG_DIR = Path(__file__).resolve().parent / "verification_figures"
@@ -131,8 +131,8 @@ def ensureDirs() -> None:
     REPORT.parent.mkdir(parents=True, exist_ok=True)
 
 
-def loadData() -> pd.DataFrame:
-    return pd.read_csv(WINDOW_DATA, encoding="utf-8-sig").sort_values("window_id").reset_index(drop=True)
+def loadData(window_data: Path = WINDOW_DATA) -> pd.DataFrame:
+    return pd.read_csv(window_data, encoding="utf-8-sig").sort_values("window_id").reset_index(drop=True)
 
 
 GROUP_KEY = ["date", "flow_point", "disturbance_id"]

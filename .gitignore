@@ -8,8 +8,9 @@ __pycache__/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
-/code/paper_appendix/verification_outputs/
-/code/paper_appendix/verification_figures/
-/code/paper_appendix/verification_reports/
-/code/paper_appendix/official_evaluation/
+/runs/
+/src/flowmeter/verification_outputs/
+/src/flowmeter/verification_figures/
+/src/flowmeter/verification_reports/
+/src/flowmeter/official_evaluation/
 output_test/

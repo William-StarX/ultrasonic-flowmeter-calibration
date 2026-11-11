@@ -52,7 +52,7 @@ import pandas as pd
 SCRIPT_VERSION = "constrained-d0-rbf-postcalibrated-dual-kernel-krr-20260712"
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[1]
+DATA_DIR = HERE.parents[1] / "data" / "calibration"
 OUT_DIR = HERE / "verification_outputs"
 REPORT_DIR = Path(__file__).resolve().parent / "verification_reports"
 
@@ -542,14 +542,16 @@ def saveOfficialOutputs(
     model_arrays: dict[str, np.ndarray],
     model_meta: dict[str, object],
     base_summary: dict[str, object],
+    output_dir: Path,
+    report_dir: Path,
 ) -> None:
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    report_dir.mkdir(parents=True, exist_ok=True)
 
     submission = data[["window_id"]].reset_index(drop=True).copy()
     submission["model_volume_m3"] = np.asarray(yuceJieguo, dtype=float)
 
-    submission_path = OUT_DIR / "submission_d0_rbf_postcalibrated_dual_kernel_krr.csv"
+    submission_path = output_dir / "submission_d0_rbf_postcalibrated_dual_kernel_krr.csv"
     submission.to_csv(
         submission_path,
         index=False,
@@ -558,44 +560,44 @@ def saveOfficialOutputs(
     )
 
     pd.DataFrame([summary]).to_csv(
-        OUT_DIR / "d0_rbf_postcalibrated_dual_kernel_krr_evaluation_summary.csv",
+        output_dir / "d0_rbf_postcalibrated_dual_kernel_krr_evaluation_summary.csv",
         index=False,
         encoding="utf-8-sig",
         float_format="%.12g",
     )
     groups.to_csv(
-        OUT_DIR / "d0_rbf_postcalibrated_dual_kernel_krr_evaluation_groups.csv",
+        output_dir / "d0_rbf_postcalibrated_dual_kernel_krr_evaluation_groups.csv",
         index=False,
         encoding="utf-8-sig",
         float_format="%.12g",
     )
     windows.to_csv(
-        OUT_DIR / "d0_rbf_postcalibrated_dual_kernel_krr_evaluation_windows.csv",
+        output_dir / "d0_rbf_postcalibrated_dual_kernel_krr_evaluation_windows.csv",
         index=False,
         encoding="utf-8-sig",
         float_format="%.12g",
     )
     ranking.to_csv(
-        OUT_DIR / "d0_rbf_postcalibrated_dual_kernel_krr_candidate_ranking.csv",
+        output_dir / "d0_rbf_postcalibrated_dual_kernel_krr_candidate_ranking.csv",
         index=False,
         encoding="utf-8-sig",
         float_format="%.12g",
     )
 
     np.savez_compressed(
-        OUT_DIR / "d0_rbf_postcalibrated_dual_kernel_krr_model.npz",
+        output_dir / "d0_rbf_postcalibrated_dual_kernel_krr_model.npz",
         **model_arrays,
     )
-    (OUT_DIR / "d0_rbf_postcalibrated_dual_kernel_krr_model_meta.json").write_text(
+    (output_dir / "d0_rbf_postcalibrated_dual_kernel_krr_model_meta.json").write_text(
         json.dumps(model_meta, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 
     promoted_path = ""
     if bool(summary["pass_all_3"]) and PROMOTE_TO_SUBMISSION_FINAL_IF_PASS:
-        final_path = OUT_DIR / "submission_final.csv"
+        final_path = output_dir / "submission_final.csv"
         if final_path.exists():
-            backup = OUT_DIR / "submission_final_before_postcalibration.csv"
+            backup = output_dir / "submission_final_before_postcalibration.csv"
             shutil.copy2(final_path, backup)
         shutil.copy2(submission_path, final_path)
         promoted_path = str(final_path)
@@ -627,7 +629,7 @@ def saveOfficialOutputs(
 本脚本以冻结的物理--稳定性双核 KRR 为主模型，仅增加一个完整数据校准层，
 并直接使用 `evaluate_submission.py` 的三个指标公式选择候选。
 
-这是已知 159 窗口上的全量标定结果，不代表未知工况泛化性能。
+这是已知 {len(data)} 个窗口上的全量标定结果，不代表未知工况泛化性能。
 
 ## 冻结主模型
 
@@ -672,7 +674,7 @@ krr_dual_ps_pg0.05_rg0.005_b0.5_lam0.3_d0lin
 
 自动提升到 `submission_final.csv`：`{promoted_path or "否"}`
 """
-    (REPORT_DIR / "D0_RBF_POSTCALIBRATED_DUAL_KERNEL_KRR_REPORT.md").write_text(
+    (report_dir / "D0_RBF_POSTCALIBRATED_DUAL_KERNEL_KRR_REPORT.md").write_text(
         report,
         encoding="utf-8",
     )
@@ -680,7 +682,7 @@ krr_dual_ps_pg0.05_rg0.005_b0.5_lam0.3_d0lin
 
 def optionallyRunExternalEvaluator(submission_path: Path) -> None:
     candidates = [
-        ROOT / "A题 (1)" / "evaluate_submission.py",
+        DATA_DIR / "evaluate_submission.py",
         HERE / "evaluate_submission.py",
     ]
     evaluator = next((path for path in candidates if path.exists()), None)
@@ -705,20 +707,15 @@ def optionallyRunExternalEvaluator(submission_path: Path) -> None:
         )
 
 
-def run() -> None:
+def run(
+    *, data_dir: Path = DATA_DIR, output_dir: Path = OUT_DIR, report_dir: Path = REPORT_DIR
+) -> None:
     print(f"=== Running {SCRIPT_VERSION} ===", flush=True)
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    report_dir.mkdir(parents=True, exist_ok=True)
 
-    data = CORE.loadDataWithRawFeatures().reset_index(drop=True)
+    data = CORE.loadDataWithRawFeatures(data_dir, output_dir)
     features = CORE.modelFeatureFrame(data).reset_index(drop=True)
-
-    if len(data) != 159:
-        print(
-            f"[warning] 当前窗口数为 {len(data)}，不是预期的159；"
-            "仍按实际数据运行。",
-            flush=True,
-        )
 
     frozen_spec, frozen_model, frozen_prediction, frozen_diag = (
         buildFrozenDualKernelModel(data, features)
@@ -994,7 +991,7 @@ def run() -> None:
         "correction_clip_pct": CORRECTION_CLIP_PCT,
         "feature_columns": payload["feature_columns"],
         "warning": (
-            "This calibration layer was fitted and selected on the same 159 labeled "
+            f"This calibration layer was fitted and selected on the same {len(data)} labeled "
             "windows used by the official evaluator. It is submission/full-data "
             "calibration, not independent generalisation evidence."
         ),
@@ -1011,6 +1008,8 @@ def run() -> None:
         model_arrays=model_arrays,
         model_meta=model_meta,
         base_summary=base_summary,
+        output_dir=output_dir,
+        report_dir=report_dir,
     )
 
     print("\n=== Constrained D0-RBF postcalibrated dual-kernel KRR ===")
@@ -1018,23 +1017,23 @@ def run() -> None:
     print("\n=== Official evaluation ===")
     print(pd.Series(best_summary).to_string())
 
-    submission_path = OUT_DIR / "submission_d0_rbf_postcalibrated_dual_kernel_krr.csv"
-    optionallyRunExternalEvaluator(submission_path)
+    submission_path = output_dir / "submission_d0_rbf_postcalibrated_dual_kernel_krr.csv"
 
     print(f"\nSubmission: {submission_path}")
     print(
         "Summary: "
-        f"{OUT_DIR / 'd0_rbf_postcalibrated_dual_kernel_krr_evaluation_summary.csv'}"
+        f"{output_dir / 'd0_rbf_postcalibrated_dual_kernel_krr_evaluation_summary.csv'}"
     )
     print(
         "Ranking: "
-        f"{OUT_DIR / 'd0_rbf_postcalibrated_dual_kernel_krr_candidate_ranking.csv'}"
+        f"{output_dir / 'd0_rbf_postcalibrated_dual_kernel_krr_candidate_ranking.csv'}"
     )
     print(
         "Report: "
-        f"{REPORT_DIR / 'D0_RBF_POSTCALIBRATED_DUAL_KERNEL_KRR_REPORT.md'}"
+        f"{report_dir / 'D0_RBF_POSTCALIBRATED_DUAL_KERNEL_KRR_REPORT.md'}"
     )
 
 
 if __name__ == "__main__":
     run()
+    optionallyRunExternalEvaluator(OUT_DIR / "submission_d0_rbf_postcalibrated_dual_kernel_krr.csv")

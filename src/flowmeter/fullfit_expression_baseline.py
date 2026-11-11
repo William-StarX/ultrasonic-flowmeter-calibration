@@ -24,7 +24,7 @@ from reportlab.pdfgen import canvas
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA_DIR = ROOT / "A题 (1)"
+DATA_DIR = ROOT / "data" / "calibration"
 OUTPUT_DIR = Path(__file__).resolve().parent / "verification_outputs"
 FIG_DIR = Path(__file__).resolve().parent / "verification_figures"
 REPORT_DIR = Path(__file__).resolve().parent / "verification_reports"

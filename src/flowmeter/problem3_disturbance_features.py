@@ -20,7 +20,7 @@ from compact_rbf_krr import columnsForFeatureSet
 ROOT = Path(__file__).resolve().parents[2]
 FIG_DIR = Path(__file__).resolve().parent / "verification_figures"
 REPORT = Path(__file__).resolve().parent / "verification_reports" / "DISTURBANCE_MECHANISM_ANALYSIS.md"
-FAILURE_MODE_FILE = ROOT / "code" / "outputs" / "krr_leave_one_group_failure_modes.csv"
+FAILURE_MODE_FILE = ROOT / "results" / "robustness" / "krr_leave_one_group_failure_modes.csv"
 
 RANDOM_SEED = 20260711
 CLUSTER_K_RANGE = range(2, 6)
