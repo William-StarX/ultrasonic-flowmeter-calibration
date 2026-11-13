@@ -1,46 +1,101 @@
-# 多声道超声波流量计校准工具
+# 多声道超声波流量计校准工具<br>Multipath ultrasonic flowmeter calibration
 
-面向参考标定数据有限的台架试验，采用**少样本训练**补偿管道扰流引起的计量偏差。模型以五声道物理积分为基线，用正则化双核岭回归学习剩余误差。工具输出逐窗口校准体积、分组误差、线性度、重复性和扰流影响指标。
+输入试验窗口、逐秒声道观测和仪表几何参数，输出校准体积及误差报告。可以用样例复跑校准，也可以单独评价已有的仪表或模型体积估计。
 
-## 快速开始
+Provide test windows, per-second channel observations, and meter geometry to obtain calibrated volumes and error reports. Reproduce the sample calibration, or independently evaluate volume estimates from an instrument or another model.
 
-在仓库根目录使用 Python 3.11 或 3.12。下面两条命令分别复跑样例校准、独立评价生成的体积估计。
+## 快速开始：评价现成结果<br>Quick start: evaluate the supplied estimates
 
-```powershell
+使用 **Python 3.11 或 3.12**。下面的命令读取仓库中已有的体积估计，生成一份评价报告：
+
+Use **Python 3.11 or 3.12**. These commands read the supplied volume estimates and generate an evaluation report:
+
+```sh
+git clone https://github.com/William-StarX/ultrasonic-flowmeter-calibration.git
+cd ultrasonic-flowmeter-calibration
 python -m pip install -r requirements.txt
-python src/flowmeter calibrate --data-dir data/calibration --output-dir runs/calibration
-python src/flowmeter evaluate --estimates runs/calibration/submission_final.csv --output-dir runs/evaluation
+python src/flowmeter evaluate --estimates results/calibrated-model/submission_final.csv --output-dir runs/evaluation
 ```
 
-- `runs/calibration/` 保存体积估计、逐窗口稳健特征、候选参数和校准报告。样例达到基准阈值时生成 `submission_final.csv`。
-- `runs/evaluation/` 生成 `evaluation_summary.csv`、`evaluation_groups.csv` 和 `evaluation_windows.csv`。
-- 可以单独运行 `evaluate`，用 `--reference` 指定参考窗口 CSV，用 `--estimates` 指定仪表或模型给出的体积估计。两份表以 `window_id` 一一对齐。
+完成后打开 `runs/evaluation/evaluation_summary.csv` 查看总体指标，逐窗口误差和分组结果保存在同一目录。
 
-## 校准流程
+Open `runs/evaluation/evaluation_summary.csv` for the overall metrics. Per-window errors and grouped results are saved alongside it.
 
-1. 将窗口汇总数据与逐秒声道数据按 `window_id` 对齐，提取声道速度剖面和稳定性特征。
-2. 以五声道物理积分为基准，使用双核岭回归补偿由剖面形态与声道稳定性变化引起的体积偏差。
-3. 在带参考体积的试验批次上拟合受约束的 D0-RBF 后校准，输出每个窗口的体积估计。
-4. 按试验日期与名义流量点评价误差均值和重复性，并计算线性度与扰流影响。
+## 重新运行校准<br>Run the calibration
 
-## 少样本训练与验证
+使用随仓库提供的台架样例重新拟合，再评价生成的体积估计：
 
-样例包含 **159 个带参考体积的窗口**，使用 DN400 仪表的等效几何参数。29,322 条逐秒观测按窗口汇总为输入特征，监督标签是参考装置测得的窗口体积。代表性模型对照使用 **118 个窗口训练、41 个窗口留出验证**。40 次分层验证中，每次使用 111–128 个窗口训练。
+Refit using the supplied bench-test data, then evaluate the generated estimates:
 
-| 评估口径 | 平均绝对相对误差 | 阈值通过情况 |
-| --- | ---: | --- |
-| 五声道物理积分基准，全部 159 个窗口 | 0.180653% | — |
-| 后校准模型，同批次全量拟合 | 0.015891% | 30/30 个分组通过，三项指标均通过 |
-| 双核补偿模型，40 次分层留出验证 | 中位数 0.061356% | 0/40 次同时达到全部阈值 |
+```sh
+python src/flowmeter calibrate --data-dir data/calibration --output-dir runs/calibration
+python src/flowmeter evaluate --estimates runs/calibration/submission_d0_rbf_postcalibrated_dual_kernel_krr.csv --output-dir runs/calibration-check
+```
 
-全量拟合衡量当前批次的校准精度。现场部署前需用新仪表或新工况的独立参考数据验证误差与重复性。当前提供离线批处理入口。
+`runs/calibration/` 保存体积估计、候选参数、模型文件和校准报告；达到基准阈值时还会生成 `submission_final.csv`。详细报告位于其 `reports/` 子目录。
 
-## 项目目录
+`runs/calibration/` contains volume estimates, candidate parameters, model files, and calibration reports. A `submission_final.csv` is also produced when the benchmark thresholds are met. Detailed reports are in its `reports/` subdirectory.
 
-| 路径 | 内容 |
-| --- | --- |
-| [`src/flowmeter/`](src/flowmeter/) | 命令行入口、声道特征、补偿模型和评估 |
-| [`data/calibration/`](data/calibration/) | 台架样例数据、几何参数和数据字典 |
-| [`results/`](results/) | [评估摘要](results/benchmark-evaluation/evaluation_summary.csv)、[模型对比](results/model-validation/)和[整组留出诊断](results/robustness/) |
-| [`docs/数据与验证.md`](docs/数据与验证.md) | 自有批次的输入约定、输出字段和验证方法 |
-| [`paper/`](paper/) · [`figures/`](figures/) | 方法报告、论文源文件和技术图表 |
+## 换成自己的数据<br>Use your own data
+
+校准目录需要以下三份 CSV，字段与单位沿用 [数据字典](data/calibration/attachment3_data_dictionary.csv)。把 `--data-dir` 改成自己的目录即可。
+
+The calibration directory needs these three CSV files, following the fields and units in the [data dictionary](data/calibration/attachment3_data_dictionary.csv). Point `--data-dir` to your directory.
+
+| 文件<br>File | 内容<br>Contents |
+|---|---|
+| `attachment1_window_data.csv` | 窗口编号、参考体积、工况和窗口级特征<br>Window IDs, reference volumes, conditions, and window features |
+| `attachment6_window_raw_samples.csv` | 按窗口编号对齐的逐秒声道观测<br>Per-second channel observations matched by window ID |
+| `attachment7_meter_geometry.csv` | 管径、声道映射、弦位和积分权重<br>Pipe diameter, channel mapping, chord positions, and integration weights |
+
+只想评价已有估计时，准备参考表和包含 `window_id`、`model_volume_m3` 的估计表，以相同窗口编号对齐，体积单位为 m³：
+
+To evaluate existing estimates, prepare a reference table and an estimate table containing `window_id` and `model_volume_m3`. Match the same window IDs and use m³ for volume:
+
+```sh
+python src/flowmeter evaluate --reference path/to/reference.csv --estimates path/to/estimates.csv --output-dir runs/check
+```
+
+参考表的完整字段、工况标记和指标口径见 [数据与验证](docs/数据与验证.md)。
+
+See [data and validation](docs/数据与验证.md) for reference-table fields, condition labels, and metric definitions.
+
+## 读取评价输出<br>Read the evaluation output
+
+| 文件<br>File | 用途<br>Purpose |
+|---|---|
+| `evaluation_summary.csv` | 总体误差、分组通过数、线性度、重复性和扰流影响<br>Overall error, passing groups, linearity, repeatability, and disturbance effects |
+| `evaluation_groups.csv` | 按日期与流量点汇总的误差和重复性<br>Error and repeatability grouped by date and flow point |
+| `evaluation_windows.csv` | 每个窗口的参考体积、估计体积与相对误差<br>Reference volume, estimated volume, and relative error for each window |
+
+## 本项目的工作与样例结果<br>Project contributions and sample results
+
+工具将声道原始观测、物理积分、双核误差补偿和独立评价接到同一套文件接口中。对带参考体积的少量窗口进行校准后，可以同时查看总体精度、重复性和不同扰流条件下的表现。
+
+The tool connects raw channel observations, physical integration, dual-kernel error compensation, and independent evaluation through one file-based interface. Calibration on a small set of reference-labelled windows can be assessed through overall accuracy, repeatability, and performance under different disturbance conditions.
+
+样例包含 **159 个参考窗口、29,322 条逐秒观测**，采用 DN400 等效几何。代表性对照使用 118 个窗口训练、41 个留出验证；40 次分层验证每次使用 111–128 个训练窗口。
+
+The sample contains **159 reference windows and 29,322 per-second observations**, using equivalent DN400 geometry. A representative comparison uses 118 training windows and 41 held-out windows; the 40 stratified validations use 111–128 training windows each.
+
+| 评估口径<br>Evaluation | 平均绝对相对误差<br>Mean absolute relative error | 阈值通过情况<br>Threshold results |
+|---|---:|---|
+| 五声道物理积分，全部窗口<br>Five-channel physical integration, all windows | 0.180653% | — |
+| 后校准模型，同批次全量拟合<br>Post-calibrated model, full fit on the same batch | 0.015891% | 30/30 分组及三项指标通过<br>30/30 groups and all three metrics pass |
+| 双核补偿，40 次分层留出<br>Dual-kernel compensation, 40 stratified holdouts | 中位数 0.061356%<br>Median 0.061356% | 0/40 次同时通过全部阈值<br>0/40 runs pass all thresholds together |
+
+[评估摘要](results/benchmark-evaluation/evaluation_summary.csv) · [模型对比](results/model-validation/) · [整组留出诊断](results/robustness/)
+
+[Evaluation summary](results/benchmark-evaluation/evaluation_summary.csv) · [Model comparisons](results/model-validation/) · [Group-holdout diagnostics](results/robustness/)
+
+## 方法、文献与源码<br>Methods, references, and source
+
+模型采用多声道物理积分与数据驱动误差补偿思路。公式和试验设计见 [方法报告](paper/main.pdf)，相关论文见 [文献依据](docs/LITERATURE_BASIS.md)，原始资料见 [资料索引](docs/资料索引.md)。命令行和模型实现在 [src/flowmeter/](src/flowmeter/)，NumPy、pandas 等依赖列于 [requirements.txt](requirements.txt)。
+
+The model combines multipath physical integration with data-driven error compensation. See the [method report](paper/main.pdf) for formulas and experiment design, the [literature basis](docs/LITERATURE_BASIS.md) for related papers, and the [source-material index](docs/资料索引.md) for original materials. The CLI and models are in [src/flowmeter/](src/flowmeter/); dependencies such as NumPy and pandas are listed in [requirements.txt](requirements.txt).
+
+## 注意事项<br>Attention
+
+同批次全量拟合衡量当前批次的校准精度；新仪表或新工况需要独立参考数据验证。当前入口用于离线批处理。
+
+A full fit measures calibration accuracy on the current batch. New instruments or operating conditions need independent reference data for validation. The current interface runs offline batches.
